@@ -1,17 +1,6 @@
 import streamlit as st
 
 class Opportunity:
-    title = str
-    description = str
-    author = str
-    author_occupation = str
-    author_location = str
-    contact_email = str
-    contact_phone = str
-    organization = str
-    opportunity_type = str
-    fieldOfStudy = str
-
     def __init__(self, title, description, author, author_occupation, author_location, contact_email, contact_phone, organization, opportunity_type, fieldOfStudy):
         self.title = title
         self.description = description
@@ -39,11 +28,15 @@ class OpportunityBoard:
             return self.opportunities
         return [opp for opp in self.opportunities if opp.opportunity_type == selected_type]
 
+# Persist board across reruns
+if "board" not in st.session_state:
+    st.session_state.board = OpportunityBoard()
+
+board = st.session_state.board
+
 # Initialize app title
 st.title("🎓 Network Board – Student Opportunities Platform")
 st.write("Browse and post professional opportunities for students across different fields.")
-
-board = OpportunityBoard()
 
 with st.form("add_opportunity"):
     st.header("Post a New Opportunity")
@@ -86,4 +79,3 @@ for opp in filtered_opps:
         """,
         unsafe_allow_html=True
     )
-

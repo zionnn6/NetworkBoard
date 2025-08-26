@@ -1,7 +1,8 @@
 import streamlit as st
 
 class Opportunity:
-    def __init__(self, title, description, author, author_occupation, author_location, contact_email, contact_phone, organization, opportunity_type, fieldOfStudy):
+    def __init__(self, title, description, author, author_occupation, author_location,
+                 contact_email, contact_phone, organization, opportunity_type, fieldOfStudy):
         self.title = title
         self.description = description
         self.author = author
@@ -28,16 +29,21 @@ class OpportunityBoard:
             return self.opportunities
         return [opp for opp in self.opportunities if opp.opportunity_type == selected_type]
 
+    def delete_opportunity(self, index: int):
+        if index < len(self.opportunities):
+            del self.opportunities[index]
+
 # Persist board across reruns
 if "board" not in st.session_state:
     st.session_state.board = OpportunityBoard()
 
 board = st.session_state.board
 
-# Initialize app title
-st.title("🎓 Network Board – Student Opportunities Platform")
+# App title
+st.title("Network Board – Student Opportunities Platform")
 st.write("Browse and post professional opportunities for students across different fields.")
 
+# Form to add new opportunities
 with st.form("add_opportunity"):
     st.header("Post a New Opportunity")
     title = st.text_input("Title")
@@ -49,25 +55,40 @@ with st.form("add_opportunity"):
     contact_phone = st.text_input("Contact Phone")
     organization = st.text_input("Organization")
     fieldOfStudy = st.text_input("Field of Study")
-    opportunity_type = st.selectbox("Who you're looking for", ["Ambassador", "Intern", "Mentee", "Part-Time Employee", "Project Collaborator", "Research Assistant", "Shadow", "Volunteer", "Other"])
+    opportunity_type = st.selectbox(
+        "Who you're looking for",
+        ["Ambassador", "Intern", "Mentee", "Part-Time Employee",
+         "Project Collaborator", "Research Assistant", "Shadow", "Volunteer", "Other"]
+    )
     submitted = st.form_submit_button("Post Opportunity")
 
     if submitted:
-        new_opp = Opportunity(title, description, author, author_occupation, author_location, contact_email, contact_phone, organization, opportunity_type, fieldOfStudy)
+        new_opp = Opportunity(
+            title, description, author, author_occupation, author_location,
+            contact_email, contact_phone, organization, opportunity_type, fieldOfStudy
+        )
         board.add_opportunity(new_opp)
+        st.session_state["rerun"] = not st.session_state.get("rerun", False)
 
+# Filter dropdown
 st.subheader("Browse Opportunities")
-field_filter = st.selectbox("Filter by Opportunity Type", ["All", "Ambassador", "Intern", "Mentee", "Part-Time Employee", "Project Collaborator", "Research Assistant", "Shadow", "Volunteer", "Other"])
+field_filter = st.selectbox(
+    "Filter by Opportunity Type",
+    ["All", "Ambassador", "Intern", "Mentee", "Part-Time Employee",
+     "Project Collaborator", "Research Assistant", "Shadow", "Volunteer", "Other"]
+)
+
 filtered_opps = board.filter_opportunities(field_filter)
 
-for opp in filtered_opps:
+# Display opportunities with delete buttons
+for i, opp in enumerate(filtered_opps):
     st.markdown(
         f"""
         <div style="
             border: 1px solid #ccc;
             border-radius: 10px;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         ">
             <h3>{opp.title}</h3>
             <p><strong>From:</strong> {opp.author}, {opp.author_occupation} at {opp.organization}</p>
@@ -79,3 +100,8 @@ for opp in filtered_opps:
         """,
         unsafe_allow_html=True
     )
+    if st.button("Delete", key=f"delete_{i}"):
+        # Find the original index in the main board to delete
+        original_index = board.opportunities.index(opp)
+        board.delete_opportunity(original_index)
+        st.session_state["rerun"] = not st.session_state.get("rerun", False)

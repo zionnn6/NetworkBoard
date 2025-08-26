@@ -81,24 +81,27 @@ field_filter = st.selectbox(
 filtered_opps = board.filter_opportunities(field_filter)
 
 # Display opportunities with delete buttons
-for i, opp in enumerate(filtered_opps):
-    st.markdown(
-        f"""
-        <div style="
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-        ">
-            <h3>{opp.title}</h3>
-            <p><strong>From:</strong> {opp.author}, {opp.author_occupation} at {opp.organization}</p>
-            <p><strong>Contact:</strong> {opp.contact_email} – {opp.contact_phone}</p>
-            <p>{opp.description}</p>
-            <p><strong>Field(s) of Study:</strong> {opp.fieldOfStudy}</p>
-            <p><strong>Location:</strong> {opp.author_location}</p>
-        </div>
-        """,
-        unsafe_allow_html=True
+if not filtered_opps:
+    st.info("No opportunities found. Post the first one!")
+else:
+    for i, opp in enumerate(filtered_opps):
+        st.markdown(
+            f"""
+            <div style="
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                padding: 15px;
+                margin-bottom: 10px;
+            ">
+                <h3>{opp.title}</h3>
+                <p><strong>From:</strong> {opp.author}, {opp.author_occupation} at {opp.organization}</p>
+                <p><strong>Contact:</strong> {opp.contact_email} – {opp.contact_phone}</p>
+                <p>{opp.description}</p>
+                <p><strong>Field(s) of Study:</strong> {opp.fieldOfStudy}</p>
+                <p><strong>Location:</strong> {opp.author_location}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
     )
     if st.button("Delete", key=f"delete_{i}"):
         # Find the original index in the main board to delete
